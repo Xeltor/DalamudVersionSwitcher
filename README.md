@@ -41,3 +41,30 @@ On Windows, the included batch script runs the same command inside a virtual env
 ```bat
 build.bat
 ```
+
+## Linux Build & Install
+
+1. Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+2. Run the build script:
+
+```bash
+./build.sh
+```
+
+3. Install the binary:
+
+Copy the executable from `dist/` to a directory on your PATH, for example:
+
+```bash
+cp dist/__main__ ~/.local/bin/dalamud-switcher
+```
+
+Ensure `~/.local/bin` is in your `PATH`.
+
+> **Note**: Tkinter on Linux expects `.png` icons set via `iconphoto`. If the `.ico` icon does not display, convert it to `.png`.
+
