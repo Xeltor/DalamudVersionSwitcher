@@ -20,7 +20,7 @@ pip install -r requirements.txt
 
 REM Run PyInstaller
 echo Building with PyInstaller...
-pyinstaller --onefile --windowed --icon=icon_V6O_icon.ico --clean dalamud_switcher/__main__.py
+pyinstaller --onefile --windowed --name "Dalamud Version Switcher" --icon=icon_V6O_icon.ico --clean dalamud_switcher/__main__.py
 
 REM Done
 echo Build complete!
