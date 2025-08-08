@@ -1,17 +1,36 @@
 import os
 import json
+import sys
+from pathlib import Path
+import tkinter as tk
+from tkinter import messagebox
 
-CONFIG_PATH = os.path.join(os.getenv("APPDATA"), "XIVLauncher", "dalamudConfig.json")
-BACKUP_PATH = CONFIG_PATH + ".bak"
+if os.name == "nt":
+    appdata = os.getenv("APPDATA")
+    if not appdata:
+        root = tk.Tk()
+        root.withdraw()
+        messagebox.showerror(
+            "Environment Error",
+            "The APPDATA environment variable is not set.\n"
+            "Cannot locate Dalamud configuration.",
+        )
+        root.destroy()
+        sys.exit(1)
+    CONFIG_PATH = Path(appdata) / "XIVLauncher" / "dalamudConfig.json"
+else:
+    CONFIG_PATH = Path.home() / ".xlcore" / "dalamudConfig.json"
+
+BACKUP_PATH = CONFIG_PATH.with_suffix(CONFIG_PATH.suffix + ".bak")
 
 def load_config():
     """Ensure config exists and return current beta state and password."""
-    if not os.path.exists(CONFIG_PATH):
-        os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
+    if not CONFIG_PATH.exists():
+        CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
         config = {"DalamudBetaKind": "release", "DalamudBetaKey": ""}
-        with open(CONFIG_PATH, "w") as f:
+        with CONFIG_PATH.open("w") as f:
             json.dump(config, f, indent=4)
-    with open(CONFIG_PATH, "r") as f:
+    with CONFIG_PATH.open("r") as f:
         config = json.load(f)
     is_beta = config.get("DalamudBetaKind", "release") == "stg"
     password = config.get("DalamudBetaKey", "")
@@ -19,22 +38,22 @@ def load_config():
 
 def save_config(is_beta: bool, password: str):
     """Backup and write new config values."""
-    if os.path.exists(CONFIG_PATH):
-        with open(CONFIG_PATH, "r") as f:
+    if CONFIG_PATH.exists():
+        with CONFIG_PATH.open("r") as f:
             current = json.load(f)
-        with open(BACKUP_PATH, "w") as f:
+        with BACKUP_PATH.open("w") as f:
             json.dump(current, f, indent=4)
     config = {
         "DalamudBetaKind": "stg" if is_beta else "release",
         "DalamudBetaKey": password,
     }
-    with open(CONFIG_PATH, "w") as f:
+    with CONFIG_PATH.open("w") as f:
         json.dump(config, f, indent=4)
 
 def revert_backup():
     """Restore config from backup if it exists."""
-    if os.path.exists(BACKUP_PATH):
-        with open(BACKUP_PATH, "r") as f:
+    if BACKUP_PATH.exists():
+        with BACKUP_PATH.open("r") as f:
             backup = json.load(f)
-        with open(CONFIG_PATH, "w") as f:
+        with CONFIG_PATH.open("w") as f:
             json.dump(backup, f, indent=4)
